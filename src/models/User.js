@@ -1,37 +1,40 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const bcrypt = require("bcryptjs");
 
 const USER_ROLES = {
-  SUPERADMIN: 'superAdmin',
-  PROFESSOR: 'profesor',
-  STUDENT: 'alumno'
+  SUPERADMIN: "superadmin",
+  TEACHER: "teacher",
+  STUDENT: "student",
 };
 
-const profileSchema = new mongoose.Schema({
-  // Para profesores
-  credential: { 
-    type: String, 
-    required: function() { return this.parent().role === USER_ROLES.PROFESSOR; } 
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(USER_ROLES), // usa los valores del diccionario
+      required: true,
+    },
+    profile: {
+      type: Schema.Types.Mixed, // Flexible: permite cualquier objeto
+      required: true,
+    }
   },
-
-  // Para alumnos
-  dni: { 
-    type: String, 
-    required: function() { return this.parent().role === USER_ROLES.STUDENT; } 
+  {
+    timestamps: true,
   }
-});
-
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, unique: true, required: true },
-  password: { type: String, required: true, select: false },
-  role: {
-    type: String,
-    enum: Object.values(USER_ROLES),
-    default: USER_ROLES.STUDENT
-  },
-  profileData: profileSchema
-}, { timestamps: true });
+);
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();

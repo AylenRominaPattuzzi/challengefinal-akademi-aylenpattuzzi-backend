@@ -1,17 +1,27 @@
 const express = require('express');
 const userController = require('../controllers/userController');
-const protect  = require('../middlewares/auth');
+const protect = require('../middlewares/auth');
 
 
 const router = express.Router();
 
 router.post(
-  '/auth/register',
+  '/register',
   protect,
   userController.registerUser
 );
 
 router.post(
-    '/auth/login',
-    userController.loginUser
-  );
+  '/login',
+  userController.loginUser
+);
+
+router.post(
+  '/forgot-password',
+  userController.forgotPassword
+);
+
+router.post(
+  '/reset-password/:token',
+  userController.resetPassword
+);
