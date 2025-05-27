@@ -1,9 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const userRoutes = require('./src/routes/userRoutes');
-
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -19,9 +18,17 @@ mongoose
 // Rutas
 app.use('/auth/user', userRoutes);
 
-// Rutas iniciales
-app.get('/', (req, res) => {
-  res.send('API corriendo');
+// Ruta no encontrada
+app.use((req, res, next) => {
+  const error = new HttpError('Ruta no encontrada', 404);
+  next(error);
+});
+
+app.use((error, req, res, next) => {
+  if (res.headersSent) {
+    return next(HttpError(error, error?.code || 500));
+  }
+  res.status(error.code || 500).json({ error: error.message || 'Ocurrió un error desconocido' });
 });
 
 app.listen(PORT, () => {

@@ -14,7 +14,6 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
       trim: true,
     },
     password: {
@@ -23,11 +22,11 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: Object.values(USER_ROLES), // usa los valores del diccionario
+      enum: Object.values(USER_ROLES), 
       required: true,
     },
     profile: {
-      type: Schema.Types.Mixed, // Flexible: permite cualquier objeto
+      type: Schema.Types.Mixed, 
       required: true,
     }
   },
