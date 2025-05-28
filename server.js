@@ -2,8 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const userRoutes = require('./src/routes/userRoutes');
 const HttpError = require('./src/utils/http-error');
+const userRoutes = require('./src/routes/userRoutes');
+const coursesRutes = require('./src/routes/coursesRutes');
+const enrollmentsRoutes = require('./src/routes/enrollmentsRoutes');
+
 
 const app = express();
 app.use(cors());
@@ -18,6 +21,8 @@ mongoose
 
 // Rutas
 app.use('/auth/user', userRoutes);
+app.use('/auth/curses', coursesRutes);
+app.use('/auth/enrollments', enrollmentsRoutes);
 
 // Ruta no encontrada
 app.use((req, res, next) => {

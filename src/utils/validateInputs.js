@@ -44,3 +44,17 @@ const validateCourseInput = (data, isUpdate = false) => {
 
 module.exports = validateCourseInput;
 
+const validateEnrollmentInput = (data, isUpdate = false) => {
+  const { userId, courseId, enrollmentDate } = data;
+
+  if (!userId) return new HttpError('El ID del usuario es requerido', 400);
+  if (typeof userId !== 'string') return new HttpError('El ID del usuario debe ser una cadena', 400);
+
+  if (!courseId) return new HttpError('El ID del curso es requerido', 400);
+  if (typeof courseId !== 'string') return new HttpError('El ID del curso debe ser una cadena', 400);
+
+  if (!enrollmentDate) return new HttpError('La fecha de inscripción es requerida', 400);
+  if (isNaN(Date.parse(enrollmentDate))) return new HttpError('La fecha de inscripción no es válida', 400);
+};
+
+module.exports = validateEnrollmentInput;
