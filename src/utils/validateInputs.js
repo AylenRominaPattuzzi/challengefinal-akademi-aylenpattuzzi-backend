@@ -18,3 +18,29 @@ const validateUserInput = (data, isUpdate = false) => {
 
 module.exports = validateUserInput;
 
+
+const validateCourseInput = (data, isUpdate = false) => {
+  const { title, description, professor, startDate, endDate, capacity } = data;
+
+  if (!title) return new HttpError('El título es requerido', 400);
+  if (!description) return new HttpError('La descripción es requerida', 400);
+  if (!professor) return new HttpError('El profesor es requerido', 400);
+
+  if (!startDate) return new HttpError('La fecha de inicio es requerida', 400);
+  if (isNaN(Date.parse(startDate))) return new HttpError('La fecha de inicio no es válida', 400);
+
+  if (!endDate) return new HttpError('La fecha de fin es requerida', 400);
+  if (isNaN(Date.parse(endDate))) return new HttpError('La fecha de fin no es válida', 400);
+
+  if (new Date(startDate) > new Date(endDate)) {
+    return new HttpError('La fecha de inicio no puede ser posterior a la fecha de fin', 400);
+  }
+
+  if (!capacity && capacity !== 0) return new HttpError('La capacidad es requerida', 400);
+  if (typeof capacity !== 'number' || capacity < 1) {
+    return new HttpError('La capacidad debe ser un número mayor a 0', 400);
+  }
+};
+
+module.exports = validateCourseInput;
+

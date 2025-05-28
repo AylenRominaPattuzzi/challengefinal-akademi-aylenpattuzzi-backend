@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const USER_ROLES = {
   SUPERADMIN: "superadmin",
-  TEACHER: "teacher",
+  PROFESSOR: "professor",
   STUDENT: "student",
 };
 

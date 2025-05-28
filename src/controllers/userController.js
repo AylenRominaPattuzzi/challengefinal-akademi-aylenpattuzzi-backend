@@ -1,4 +1,4 @@
-const { User } = require('../models/User');
+const { User, USER_ROLES } = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { forgotPasswordEmail } = require('../utils/emails/forgotPasswordEmail');
 const validateUserInput = require('../utils/validateInputs');
@@ -94,6 +94,51 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+//Crear usuario (solo superadmin puede crear profesor o superadmin)
+const createUser = async (req, res, next) => {
+  try {
+    const validationError = validateUserInput(req.body);
+    if (validationError) {
+      return next(validationError);
+    }
+
+    // Solo superadmin puede crear usuarios que no sean estudiantes
+    if (![USER_ROLES.SUPERADMIN].includes(req.user.role)) {
+      return next(new HttpError('No autorizado para crear usuarios', 403));
+    }
+
+    const { name, email, password, role, profile } = req.body;
+
+
+    // Validar rol permitido (solo profesor o superadmin, no estudiantes)
+    if (![USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN].includes(role)) {
+      return next(new HttpError('Rol inválido para creación por superadmin', 400));
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return next(new HttpError('Email ya registrado', 409));
+    }
+
+    const newUser = new User({
+      name,
+      email,
+      password,
+      role,
+      profile,
+    });
+
+    await newUser.save();
+    const userResponse = newUser.toObject();
+    delete userResponse.password;
+
+    res.status(201).json(userResponse);
+  } catch (error) {
+    next(new HttpError(error.message, 500));
+  }
+};
+
+
 
 const listUsers = async (req, res, next) => {
   try {
@@ -123,12 +168,11 @@ const getUserById = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new HttpError(errors.array()[0].msg, 422));
-  }
   try {
-    validateUserInput(req.body);
+    const validationError = validateUserInput(req.body, true);
+    if (validationError) {
+      return next(validationError);
+    }
     const updates = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
@@ -156,12 +200,11 @@ const deleteUser = async (req, res, next) => {
 };
 
 
-
-
 exports.registerUser = registerUser;
 exports.loginUser = loginUser;
 exports.forgotPassword = forgotPassword;
 exports.resetPassword = resetPassword;
+exports.createUser = createUser;
 exports.listUsers = listUsers;
 exports.getUserById = getUserById;
 exports.updateUser = updateUser;
