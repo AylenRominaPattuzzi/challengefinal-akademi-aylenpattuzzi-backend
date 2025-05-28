@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const userRoutes = require('./src/routes/userRoutes');
+const HttpError = require('./src/utils/http-error');
 
 const app = express();
 app.use(cors());

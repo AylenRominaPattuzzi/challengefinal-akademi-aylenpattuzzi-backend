@@ -10,6 +10,10 @@ const USER_ROLES = {
 
 const userSchema = new Schema(
   {
+    name: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -22,11 +26,11 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: Object.values(USER_ROLES), 
+      enum: Object.values(USER_ROLES),
       required: true,
     },
     profile: {
-      type: Schema.Types.Mixed, 
+      type: Schema.Types.Mixed,
       required: true,
     }
   },
