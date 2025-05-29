@@ -1,9 +1,11 @@
 const HttpError = require("./http-error");
+const { USER_ROLES } = require('../models/User');
 
 const validateUserInput = (data, isUpdate = false) => {
   const { name, email, password, role } = data;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const validRoles = ['admin', 'recepcion'];
+  const validRoles = [USER_ROLES.SUPERADMIN, USER_ROLES.PROFESSOR, USER_ROLES.STUDENT];
+
 
   if (!name) return new HttpError('El nombre es requerido', 400);
   if (!email) return new HttpError('El email es requerido', 400);
@@ -19,7 +21,7 @@ const validateUserInput = (data, isUpdate = false) => {
 module.exports = validateUserInput;
 
 
-const validateCourseInput = (data, isUpdate = false) => {
+const validateCourseInput = (data) => {
   const { title, description, professor, startDate, endDate, capacity } = data;
 
   if (!title) return new HttpError('El título es requerido', 400);
@@ -44,7 +46,7 @@ const validateCourseInput = (data, isUpdate = false) => {
 
 module.exports = validateCourseInput;
 
-const validateEnrollmentInput = (data, isUpdate = false) => {
+const validateEnrollmentInput = (data) => {
   const { userId, courseId, enrollmentDate } = data;
 
   if (!userId) return new HttpError('El ID del usuario es requerido', 400);
@@ -58,3 +60,28 @@ const validateEnrollmentInput = (data, isUpdate = false) => {
 };
 
 module.exports = validateEnrollmentInput;
+
+const validateGradeInput = async (data) => {
+  const { studentId, courseId, value } = data;
+
+  if (!studentId) return new HttpError('El ID del estudiante es requerido', 400);
+  if (typeof studentId !== 'string') return new HttpError('El ID del estudiante debe ser una cadena', 400);
+
+  if (!courseId) return new HttpError('El ID del curso es requerido', 400);
+  if (typeof courseId !== 'string') return new HttpError('El ID del curso debe ser una cadena', 400);
+
+  if (value === undefined) return new HttpError('El valor de la nota es requerido', 400);
+  if (typeof value !== 'number' || value < 0 || value > 10) {
+    return new HttpError('La calificación debe ser un número entre 0 y 10', 400);
+  }
+  const enrollment = await Enrollment.findOne({ student: studentId, course: courseId });
+  if (!enrollment) return next(new HttpError('El alumno no está inscripto en este curso', 400));
+
+  const existing = await Grade.findOne({ student: studentId, course: courseId });
+  if (existing) return next(new HttpError('La calificación ya fue cargada para este alumno en este curso', 400));
+
+  return null; 
+};
+
+module.exports = validateGradeInput;
+

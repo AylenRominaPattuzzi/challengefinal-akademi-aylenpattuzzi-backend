@@ -6,6 +6,7 @@ const HttpError = require('./src/utils/http-error');
 const userRoutes = require('./src/routes/userRoutes');
 const coursesRutes = require('./src/routes/coursesRutes');
 const enrollmentsRoutes = require('./src/routes/enrollmentsRoutes');
+const gradeRoutes = require('./src/routes/gradeRutes');
 
 
 const app = express();
@@ -21,8 +22,9 @@ mongoose
 
 // Rutas
 app.use('/auth/user', userRoutes);
-app.use('/auth/curses', coursesRutes);
-app.use('/auth/enrollments', enrollmentsRoutes);
+app.use('/courses', coursesRutes);
+app.use('/enrollments', enrollmentsRoutes);
+app.use('/grades', gradeRoutes);
 
 // Ruta no encontrada
 app.use((req, res, next) => {

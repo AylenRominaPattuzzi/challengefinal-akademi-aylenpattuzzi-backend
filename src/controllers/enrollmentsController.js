@@ -1,8 +1,8 @@
 const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
-const validateEnrollmentInput = require('../utils/validateEnrollmentInput'); // corregido nombre del archivo
-const { paginatedResponse } = require('../utils/paginatedResponse');
+const validateEnrollmentInput = require('../utils/validateInputs'); 
+
 
 // Listar mis inscripciones (solo alumno)
 const getMyEnrollments = async (req, res, next) => {
@@ -21,12 +21,16 @@ const enrollInCourse = async (req, res, next) => {
     const error = validateEnrollmentInput(req.body);
     if (error) return next(error);
 
-    const { courseId } = req.body;
+    const { userId, courseId, enrollmentDate } = req.body;
+
+    if (userId !== req.user.id) {
+      return next(new HttpError('No autorizado para inscribirse con otro ID de usuario', 403));
+    }
 
     const course = await Course.findById(courseId);
     if (!course) return next(new HttpError('Curso no encontrado', 404));
 
-    const existing = await Enrollment.findOne({ student: req.user.id, course: courseId });
+    const existing = await Enrollment.findOne({ student: userId, course: courseId });
     if (existing) return next(new HttpError('Ya estás inscripto en este curso', 400));
 
     const totalEnrolled = await Enrollment.countDocuments({ course: courseId });
@@ -34,7 +38,12 @@ const enrollInCourse = async (req, res, next) => {
       return next(new HttpError('El curso ya alcanzó el cupo máximo', 400));
     }
 
-    const enrollment = new Enrollment({ student: req.user.id, course: courseId, enrollmentDate: new Date() });
+    const enrollment = new Enrollment({ 
+      student: userId, 
+      course: courseId, 
+      enrolledAt: new Date(enrollmentDate) 
+    });
+
     await enrollment.save();
 
     res.status(201).json(enrollment);

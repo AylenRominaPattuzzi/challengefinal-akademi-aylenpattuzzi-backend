@@ -1,9 +1,10 @@
-const { Course } = require('../models/Course');
+
+const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
 const validateCourseInput = require('../utils/validateInputs');
 
-// GET /courses - Listar cursos (solo alumnos)
+//Listar cursos (solo alumnos)
 const listCourses = async (req, res, next) => {
   try {
     const filter = {};
@@ -18,7 +19,7 @@ const listCourses = async (req, res, next) => {
   }
 };
 
-// GET /courses/:id - Detalle del curso
+//Detalle del curso
 const getCourseById = async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.id).populate('professor', 'name email');
@@ -31,13 +32,13 @@ const getCourseById = async (req, res, next) => {
   }
 };
 
-// POST /courses - Crear curso (solo profesor)
+//Crear curso (solo profesor)
 const createCourse = async (req, res, next) => {
   try {
     const error = validateCourseInput(req.body);
     if (error) return next(error);
 
-    const { title, description, category, price, capacity } = req.body;
+    const { title, description, category, price, capacity, startDate, endDate } = req.body;
 
     const course = new Course({
       title,
@@ -45,6 +46,8 @@ const createCourse = async (req, res, next) => {
       category,
       price,
       capacity,
+      startDate,
+      endDate,
       professor: req.user.id,
     });
 
@@ -55,7 +58,7 @@ const createCourse = async (req, res, next) => {
   }
 };
 
-// PUT /courses/:id - Editar curso (solo profesor)
+//Editar curso (solo profesor)
 const updateCourse = async (req, res, next) => {
   try {
     const error = validateCourseInput(req.body, true);
@@ -79,7 +82,6 @@ const updateCourse = async (req, res, next) => {
   }
 };
 
-// DELETE /courses/:id - Eliminar curso (solo profesor)
 const deleteCourse = async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -88,7 +90,10 @@ const deleteCourse = async (req, res, next) => {
       return next(new HttpError('Curso no encontrado', 404));
     }
 
-    if (course.professor.toString() !== req.user.id) {
+    const isOwner = course.professor.toString() === req.user.id;
+    const isSuperAdmin = req.user.role === 'superadmin';
+
+    if (!isOwner && !isSuperAdmin) {
       return next(new HttpError('No autorizado para eliminar este curso', 403));
     }
 
@@ -99,7 +104,7 @@ const deleteCourse = async (req, res, next) => {
   }
 };
 
-// GET /courses/professorId – Listar cursos del profesor logueado
+//Listar cursos del profesor logueado
 const listCoursesByProfessor = async (req, res, next) => {
   try {
     const courses = await Course.find({ professor: req.user.id });

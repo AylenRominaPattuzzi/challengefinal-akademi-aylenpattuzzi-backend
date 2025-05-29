@@ -94,7 +94,7 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-//Crear usuario (solo superadmin puede crear profesor o superadmin)
+
 const createUser = async (req, res, next) => {
   try {
     const validationError = validateUserInput(req.body);
