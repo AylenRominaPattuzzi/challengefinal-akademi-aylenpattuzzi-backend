@@ -32,20 +32,35 @@ const loginUser = async (req, res, next) => {
 
 const registerUser = async (req, res, next) => {
   try {
-    validateUserInput(req.body);
+    const { name, email, password, role, profile } = req.body;
 
-    const existingUser = await User.findOne({ email: req.body.email });
+    if (!name || !email || !password || !profile?.documentNumber || !profile?.birthDate) {
+      return next(new HttpError('Faltan campos obligatorios', 400));
+    }
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return next(new HttpError('El email ya está registrado', 400));
     }
 
-    const newUser = new User(req.body);
+    const newUser = new User({
+      name,
+      email,
+      password,
+      role: role || USER_ROLES.STUDENT, 
+      profile: {
+        documentNumber: profile.documentNumber,
+        birthDate: profile.birthDate,
+      },
+    });
+
     await newUser.save();
-    res.status(201).json(newUser);
+    res.status(201).json({ message: 'Usuario registrado correctamente' });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
+
 
 const forgotPassword = async (req, res, next) => {
   try {
@@ -55,7 +70,7 @@ const forgotPassword = async (req, res, next) => {
     }
 
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7h' });
-    const link = `http://localhost:3001/reset-password/${token}`;
+    const link = `http://localhost:3000/reset-password/${token}`;
 
 
     await sendEmail({
