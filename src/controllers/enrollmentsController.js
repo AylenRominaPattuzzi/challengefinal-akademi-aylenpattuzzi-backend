@@ -1,7 +1,7 @@
 const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
-const validateEnrollmentInput = require('../utils/validateInputs'); 
+const {validateEnrollmentInput} = require('../utils/validateInputs'); 
 
 
 // Listar mis inscripciones (solo alumno)

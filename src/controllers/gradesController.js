@@ -1,7 +1,7 @@
 const Grade = require('../models/Grade');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
-const validateGradeInput = require('../utils/validateInputs');
+const {validateGradeInput} = require('../utils/validateInputs');
 
 
 // Cargar calificación (solo profesor)

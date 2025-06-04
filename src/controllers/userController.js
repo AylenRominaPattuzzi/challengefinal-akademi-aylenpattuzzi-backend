@@ -1,7 +1,7 @@
 const { User, USER_ROLES } = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { forgotPasswordEmail } = require('../utils/emails/forgotPasswordEmail');
-const validateUserInput = require('../utils/validateInputs');
+const {validateUserInput} = require('../utils/validateInputs');
 const sendEmail = require('../utils/sendEmail');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
@@ -152,6 +152,7 @@ const createUser = async (req, res, next) => {
     next(new HttpError(error.message, 500));
   }
 };
+
 
 
 

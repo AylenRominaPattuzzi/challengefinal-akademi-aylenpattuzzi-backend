@@ -7,6 +7,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const coursesRutes = require('./src/routes/coursesRutes');
 const enrollmentsRoutes = require('./src/routes/enrollmentsRoutes');
 const gradeRoutes = require('./src/routes/gradeRutes');
+const authRoutes = require('./src/routes/authRoutes');
 
 
 const app = express();
@@ -21,7 +22,8 @@ mongoose
   .catch((err) => console.log('Error conectando a MongoDB', err));
 
 // Rutas
-app.use('/auth/user', userRoutes);
+app.use('/user', userRoutes);
+app.use('/auth', authRoutes)
 app.use('/courses', coursesRutes);
 app.use('/enrollments', enrollmentsRoutes);
 app.use('/grades', gradeRoutes);

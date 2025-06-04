@@ -6,26 +6,40 @@ const validateUserInput = (data, isUpdate = false) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validRoles = [USER_ROLES.SUPERADMIN, USER_ROLES.PROFESSOR, USER_ROLES.STUDENT];
 
-
-  if (!name) return new HttpError('El nombre es requerido', 400);
-  if (!email) return new HttpError('El email es requerido', 400);
-  if (!emailRegex.test(email)) return new HttpError('El formato del email es inválido', 400);
-  if (!isUpdate || password) {
+  if (!isUpdate) {
+    // Validaciones para creación
+    if (!name) return new HttpError('El nombre es requerido', 400);
+    if (!email) return new HttpError('El email es requerido', 400);
+    if (!emailRegex.test(email)) return new HttpError('El formato del email es inválido', 400);
     if (!password) return new HttpError('La contraseña es requerida', 400);
     if (password.length < 8) return new HttpError('La contraseña debe tener al menos 8 caracteres', 400);
+    if (!role) return new HttpError('El rol es requerido', 400);
+    if (!validRoles.includes(role)) return new HttpError('El rol es inválido', 400);
+  } else {
+    // Validación para actualización parcial
+    if (name !== undefined && !name) return new HttpError('El nombre no puede estar vacío', 400);
+
+    if (email !== undefined) {
+      if (!email) return new HttpError('El email no puede estar vacío', 400);
+      if (!emailRegex.test(email)) return new HttpError('El formato del email es inválido', 400);
+    }
+
+    if (password !== undefined) {
+      if (!password) return new HttpError('La contraseña es requerida', 400);
+      if (password.length < 8) return new HttpError('La contraseña debe tener al menos 8 caracteres', 400);
+    }
+
+    if (role !== undefined) {
+      if (!role) return new HttpError('El rol no puede estar vacío', 400);
+      if (!validRoles.includes(role)) return new HttpError('El rol es inválido', 400);
+    }
   }
-  if (!role) return new HttpError('El rol es requerido', 400);
-  if (!validRoles.includes(role)) return new HttpError('El rol es inválido', 400);
 };
-
-module.exports = validateUserInput;
-
 
 const validateCourseInput = (data) => {
   const { title, description, professor, startDate, endDate, capacity } = data;
 
   if (!title) return new HttpError('El título es requerido', 400);
-  if (!description) return new HttpError('La descripción es requerida', 400);
   if (!professor) return new HttpError('El profesor es requerido', 400);
 
   if (!startDate) return new HttpError('La fecha de inicio es requerida', 400);
@@ -44,8 +58,6 @@ const validateCourseInput = (data) => {
   }
 };
 
-module.exports = validateCourseInput;
-
 const validateEnrollmentInput = (data) => {
   const { userId, courseId, enrollmentDate } = data;
 
@@ -58,8 +70,6 @@ const validateEnrollmentInput = (data) => {
   if (!enrollmentDate) return new HttpError('La fecha de inscripción es requerida', 400);
   if (isNaN(Date.parse(enrollmentDate))) return new HttpError('La fecha de inscripción no es válida', 400);
 };
-
-module.exports = validateEnrollmentInput;
 
 const validateGradeInput = async (data) => {
   const { studentId, courseId, value } = data;
@@ -74,14 +84,19 @@ const validateGradeInput = async (data) => {
   if (typeof value !== 'number' || value < 0 || value > 10) {
     return new HttpError('La calificación debe ser un número entre 0 y 10', 400);
   }
+
   const enrollment = await Enrollment.findOne({ student: studentId, course: courseId });
-  if (!enrollment) return next(new HttpError('El alumno no está inscripto en este curso', 400));
+  if (!enrollment) return new HttpError('El alumno no está inscripto en este curso', 400);
 
   const existing = await Grade.findOne({ student: studentId, course: courseId });
-  if (existing) return next(new HttpError('La calificación ya fue cargada para este alumno en este curso', 400));
+  if (existing) return new HttpError('La calificación ya fue cargada para este alumno en este curso', 400);
 
-  return null; 
+  return null;
 };
 
-module.exports = validateGradeInput;
-
+module.exports = {
+  validateUserInput,
+  validateCourseInput,
+  validateEnrollmentInput,
+  validateGradeInput
+};

@@ -2,7 +2,8 @@
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
-const validateCourseInput = require('../utils/validateInputs');
+const {validateCourseInput} = require('../utils/validateInputs');
+const { User, USER_ROLES } = require('../models/User');
 
 //Listar cursos (solo alumnos)
 const listCourses = async (req, res, next) => {
@@ -32,13 +33,18 @@ const getCourseById = async (req, res, next) => {
   }
 };
 
-//Crear curso (solo profesor)
+//Crear curso
 const createCourse = async (req, res, next) => {
   try {
-    const error = validateCourseInput(req.body);
-    if (error) return next(error);
+    let { professor } = req.body
+    if (req.user.role == USER_ROLES.PROFESSOR){
+      professor = req.user.id
+    }
 
+    const error = validateCourseInput({...req.body, professor});
+    if (error) return next(error);
     const { title, description, category, price, capacity, startDate, endDate } = req.body;
+
 
     const course = new Course({
       title,
@@ -48,19 +54,23 @@ const createCourse = async (req, res, next) => {
       capacity,
       startDate,
       endDate,
-      professor: req.user.id,
+      professor
     });
 
     await course.save();
     res.status(201).json(course);
   } catch (error) {
-    next(new HttpError(error.message, 500));
+    next(new HttpError(error, 500));
   }
 };
 
-//Editar curso (solo profesor)
 const updateCourse = async (req, res, next) => {
   try {
+  
+    if (req.user.role === USER_ROLES.PROFESSOR) {
+      req.body.professor = req.user.id;
+    }
+
     const error = validateCourseInput(req.body, true);
     if (error) return next(error);
 
@@ -76,11 +86,14 @@ const updateCourse = async (req, res, next) => {
 
     Object.assign(course, req.body);
     await course.save();
+
     res.json(course);
   } catch (error) {
-    next(new HttpError(error.message, 500));
+    next(new HttpError(error.message || error, 500));
   }
 };
+
+
 
 const deleteCourse = async (req, res, next) => {
   try {
@@ -107,7 +120,10 @@ const deleteCourse = async (req, res, next) => {
 //Listar cursos del profesor logueado
 const listCoursesByProfessor = async (req, res, next) => {
   try {
-    const courses = await Course.find({ professor: req.user.id });
+    if (req.user.role !== USER_ROLES.PROFESSOR){
+      return next(new HttpError('Debes estar registrado como profesor para ver ésta página', 403));
+    }
+    const courses = await Course.find({ professor: req.user.id});
     res.json(courses);
   } catch (error) {
     next(new HttpError(error.message, 500));
