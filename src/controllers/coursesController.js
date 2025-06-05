@@ -2,7 +2,7 @@
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
-const {validateCourseInput} = require('../utils/validateInputs');
+const { validateCourseInput } = require('../utils/validateInputs');
 const { User, USER_ROLES } = require('../models/User');
 
 //Listar cursos (solo alumnos)
@@ -37,11 +37,11 @@ const getCourseById = async (req, res, next) => {
 const createCourse = async (req, res, next) => {
   try {
     let { professor } = req.body
-    if (req.user.role == USER_ROLES.PROFESSOR){
+    if (req.user.role == USER_ROLES.PROFESSOR) {
       professor = req.user.id
     }
 
-    const error = validateCourseInput({...req.body, professor});
+    const error = validateCourseInput({ ...req.body, professor });
     if (error) return next(error);
     const { title, description, category, price, capacity, startDate, endDate } = req.body;
 
@@ -66,7 +66,7 @@ const createCourse = async (req, res, next) => {
 
 const updateCourse = async (req, res, next) => {
   try {
-  
+
     if (req.user.role === USER_ROLES.PROFESSOR) {
       req.body.professor = req.user.id;
     }
@@ -117,18 +117,41 @@ const deleteCourse = async (req, res, next) => {
   }
 };
 
-//Listar cursos del profesor logueado
+
 const listCoursesByProfessor = async (req, res, next) => {
   try {
-    if (req.user.role !== USER_ROLES.PROFESSOR){
+    if (req.user.role !== USER_ROLES.PROFESSOR) {
       return next(new HttpError('Debes estar registrado como profesor para ver ésta página', 403));
     }
-    const courses = await Course.find({ professor: req.user.id});
+    const courses = await Course.find({ professor: req.user.id });
     res.json(courses);
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
+
+
+const listCoursesByStudent = async (req, res, next) => {
+  try {
+    if (req.user.role !== USER_ROLES.STUDENT) {
+      return next(new HttpError('Debes estar registrado como estudiante para ver esta página', 403));
+    }
+
+    const student = await User.findById(req.user.id).populate({
+      path: 'courses',
+      populate: { path: 'professor', select: 'name email' }
+    });
+
+    if (!student) {
+      return next(new HttpError('Estudiante no encontrado', 404));
+    }
+
+    res.json(student.courses);
+  } catch (error) {
+    next(new HttpError(error.message, 500));
+  }
+};
+
 
 exports.listCourses = listCourses;
 exports.getCourseById = getCourseById;
@@ -136,3 +159,4 @@ exports.createCourse = createCourse;
 exports.updateCourse = updateCourse;
 exports.deleteCourse = deleteCourse;
 exports.listCoursesByProfessor = listCoursesByProfessor;
+exports.listCoursesByStudent = listCoursesByStudent;

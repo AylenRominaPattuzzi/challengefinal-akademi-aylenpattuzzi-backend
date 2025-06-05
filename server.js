@@ -8,6 +8,7 @@ const coursesRutes = require('./src/routes/coursesRutes');
 const enrollmentsRoutes = require('./src/routes/enrollmentsRoutes');
 const gradeRoutes = require('./src/routes/gradeRutes');
 const authRoutes = require('./src/routes/authRoutes');
+const statsRoutes = require('./src/routes/statsRoutes');
 
 
 const app = express();
@@ -27,7 +28,7 @@ app.use('/auth', authRoutes)
 app.use('/courses', coursesRutes);
 app.use('/enrollments', enrollmentsRoutes);
 app.use('/grades', gradeRoutes);
-
+app.use('/stats', statsRoutes);
 // Ruta no encontrada
 app.use((req, res, next) => {
   const error = new HttpError('Ruta no encontrada', 404);
