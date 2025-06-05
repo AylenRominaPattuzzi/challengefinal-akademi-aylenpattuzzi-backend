@@ -1,15 +1,23 @@
 const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
-const {validateEnrollmentInput} = require('../utils/validateInputs'); 
-
 
 // Listar mis inscripciones (solo alumno)
 const getMyEnrollments = async (req, res, next) => {
   try {
     const enrollments = await Enrollment.find({ student: req.user.id })
-      .populate('course', 'title description startDate endDate');
-    res.json(enrollments);
+      .populate({
+        path: 'course',
+        select: 'title description startDate endDate capacity',
+        strictPopulate: false
+      });
+
+    const formatted = enrollments.map(enrollment => ({
+      ...enrollment.course.toObject(),
+      enrollmentId: enrollment._id
+    }));
+
+    res.json(formatted);
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -18,14 +26,8 @@ const getMyEnrollments = async (req, res, next) => {
 // Inscribirse a un curso (solo alumno)
 const enrollInCourse = async (req, res, next) => {
   try {
-    const error = validateEnrollmentInput(req.body);
-    if (error) return next(error);
-
-    const { userId, courseId, enrollmentDate } = req.body;
-
-    if (userId !== req.user.id) {
-      return next(new HttpError('No autorizado para inscribirse con otro ID de usuario', 403));
-    }
+    const { courseId, enrollmentDate } = req.body;
+    const userId = req.user.id;
 
     const course = await Course.findById(courseId);
     if (!course) return next(new HttpError('Curso no encontrado', 404));
@@ -38,10 +40,20 @@ const enrollInCourse = async (req, res, next) => {
       return next(new HttpError('El curso ya alcanzó el cupo máximo', 400));
     }
 
-    const enrollment = new Enrollment({ 
-      student: userId, 
-      course: courseId, 
-      enrolledAt: new Date(enrollmentDate) 
+    let parsedDate = new Date();
+    if (enrollmentDate) {
+      const tempDate = new Date(enrollmentDate);
+      if (!isNaN(tempDate.getTime())) {
+        parsedDate = tempDate;
+      } else {
+        return next(new HttpError('La fecha de inscripción es inválida', 400));
+      }
+    }
+
+    const enrollment = new Enrollment({
+      student: userId,
+      course: courseId,
+      enrolledAt: parsedDate
     });
 
     await enrollment.save();

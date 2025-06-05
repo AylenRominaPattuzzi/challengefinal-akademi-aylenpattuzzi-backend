@@ -6,7 +6,7 @@ const { USER_ROLES } = require('../models/User');
 
 const router = express.Router();
 
-router.get('/:studentId', protect, restrictTo(USER_ROLES.STUDENT, USER_ROLES.SUPERADMIN), enrollmentController.getMyEnrollments);
+router.get('/my-courses', protect, restrictTo(USER_ROLES.STUDENT, USER_ROLES.SUPERADMIN), enrollmentController.getMyEnrollments);
 router.post('', protect, restrictTo(USER_ROLES.STUDENT, USER_ROLES.SUPERADMIN), enrollmentController.enrollInCourse);
 router.delete('/:id', protect, restrictTo(USER_ROLES.STUDENT, USER_ROLES.SUPERADMIN), enrollmentController.cancelEnrollment);
 

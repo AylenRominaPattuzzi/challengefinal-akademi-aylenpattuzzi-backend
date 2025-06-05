@@ -8,7 +8,6 @@ const router = express.Router();
 router.post('/', protect, restrictTo(USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN), coursesController.createCourse);
 router.get('/', coursesController.listCourses);
 router.get('/professor', protect, restrictTo(USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN), coursesController.listCoursesByProfessor);
-router.get('/student/my-courses', protect, restrictTo(USER_ROLES.STUDENT, USER_ROLES.SUPERADMIN), coursesController.listCoursesByStudent);
 router.get('/:id', protect, coursesController.getCourseById);
 router.put('/:id', protect, restrictTo(USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN), coursesController.updateCourse);
 router.delete('/:id', protect, restrictTo(USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN), coursesController.deleteCourse);

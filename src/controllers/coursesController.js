@@ -3,7 +3,8 @@ const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
 const { validateCourseInput } = require('../utils/validateInputs');
-const { User, USER_ROLES } = require('../models/User');
+const { USER_ROLES } = require('../models/User');
+
 
 //Listar cursos (solo alumnos)
 const listCourses = async (req, res, next) => {
@@ -131,27 +132,6 @@ const listCoursesByProfessor = async (req, res, next) => {
 };
 
 
-const listCoursesByStudent = async (req, res, next) => {
-  try {
-    if (req.user.role !== USER_ROLES.STUDENT) {
-      return next(new HttpError('Debes estar registrado como estudiante para ver esta página', 403));
-    }
-
-    const student = await User.findById(req.user.id).populate({
-      path: 'courses',
-      populate: { path: 'professor', select: 'name email' }
-    });
-
-    if (!student) {
-      return next(new HttpError('Estudiante no encontrado', 404));
-    }
-
-    res.json(student.courses);
-  } catch (error) {
-    next(new HttpError(error.message, 500));
-  }
-};
-
 
 exports.listCourses = listCourses;
 exports.getCourseById = getCourseById;
@@ -159,4 +139,3 @@ exports.createCourse = createCourse;
 exports.updateCourse = updateCourse;
 exports.deleteCourse = deleteCourse;
 exports.listCoursesByProfessor = listCoursesByProfessor;
-exports.listCoursesByStudent = listCoursesByStudent;

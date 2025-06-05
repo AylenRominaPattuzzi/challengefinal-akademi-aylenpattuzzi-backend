@@ -33,10 +33,10 @@ const courseSchema = new Schema({
     type: String,
     required: true,
   },
-  studentsEnrolled: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }]
+  price: {
+    type: Number,
+    required: true,
+  }
 }, {
   timestamps: true
 });

@@ -2,6 +2,9 @@ const Grade = require('../models/Grade');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const {validateGradeInput} = require('../utils/validateInputs');
+const Enrollment = require('../models/Enrollment');
+
+
 
 
 // Cargar calificación (solo profesor)
@@ -66,7 +69,28 @@ const getGradesByStudent = async (req, res, next) => {
   }
 };
 
+const getGradesByCourse = async (req, res, next) => {
+  try {
+
+    const grades = await Grade.find({ course: req.params.id})
+      .populate('student');
+    let extra = []
+    const enrolled = await Enrollment.find({course: req.params.id})
+      .populate("student")
+    studentsWithGrades = grades.map(grade => grade.student.id)
+    enrolled.forEach(enroll => {
+      if (! studentsWithGrades.includes(enroll.student.id)){
+        extra = [...extra, enroll.student]
+      }
+    });
+    res.json({grades, extra});
+  } catch (error) {
+    next(new HttpError(error.message, 500));
+  }
+};
+
 exports.createGrade = createGrade;
 exports.updateGrade = updateGrade;
 exports.getGradesByStudent = getGradesByStudent;
+exports.getGradesByCourse = getGradesByCourse;
 
