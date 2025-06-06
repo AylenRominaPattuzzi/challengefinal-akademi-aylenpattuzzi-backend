@@ -1,13 +1,9 @@
 const Grade = require('../models/Grade');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
-const {validateGradeInput} = require('../utils/validateInputs');
+const { validateGradeInput } = require('../utils/validateInputs');
 const Enrollment = require('../models/Enrollment');
 
-
-
-
-// Cargar calificación (solo profesor)
 const createGrade = async (req, res, next) => {
   try {
     const error = await validateGradeInput(req.body);
@@ -30,7 +26,7 @@ const createGrade = async (req, res, next) => {
   }
 };
 
-//Editar calificación (solo profesor)
+
 const updateGrade = async (req, res, next) => {
   try {
     const grade = await Grade.findById(req.params.id).populate('course');
@@ -58,32 +54,34 @@ const updateGrade = async (req, res, next) => {
 };
 
 
-//Ver calificaciones de un alumno
 const getGradesByStudent = async (req, res, next) => {
   try {
-    const grades = await Grade.find({ student: req.params.id })
-      .populate('course', 'title description startDate endDate');
+    
+    const grades = await Grade.find({ student: req.user.id })
+      .populate('course', 'title');
+
     res.json(grades);
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
 
+
 const getGradesByCourse = async (req, res, next) => {
   try {
 
-    const grades = await Grade.find({ course: req.params.id})
+    const grades = await Grade.find({ course: req.params.id })
       .populate('student');
     let extra = []
-    const enrolled = await Enrollment.find({course: req.params.id})
+    const enrolled = await Enrollment.find({ course: req.params.id })
       .populate("student")
     studentsWithGrades = grades.map(grade => grade.student.id)
     enrolled.forEach(enroll => {
-      if (! studentsWithGrades.includes(enroll.student.id)){
+      if (!studentsWithGrades.includes(enroll.student.id)) {
         extra = [...extra, enroll.student]
       }
     });
-    res.json({grades, extra});
+    res.json({ grades, extra });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }

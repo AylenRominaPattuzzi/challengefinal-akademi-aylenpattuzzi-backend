@@ -1,27 +1,46 @@
-
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
 const { validateCourseInput } = require('../utils/validateInputs');
 const { USER_ROLES } = require('../models/User');
+const Enrollment = require('../models/Enrollment');
 
-
-//Listar cursos (solo alumnos)
 const listCourses = async (req, res, next) => {
   try {
     const filter = {};
+
+    if (req.query.search) {
+      const regex = new RegExp(req.query.search, 'i');
+      filter['$or'] = [
+        { title: regex }
+      ]
+    }
+
     if (req.query.category) {
       filter.category = req.query.category;
     }
 
     const { data, total, page, limit, totalPages } = await paginatedResponse(Course, req.query, filter);
-    res.json({ data, total, page, limit, totalPages });
+    let formatted = await Promise.all(data.map(async course => {
+      const enrolleds = await Enrollment.countDocuments({ course: course._id })
+      return { ...course.toObject(), enrolleds }
+    }))
+
+    if (req.user.role === 'student') {
+      formatted = await Promise.all(formatted.map(async course => {
+        const isEnrolled = (await Enrollment.countDocuments({ course: course._id, student: req.user.id }));
+
+        return { ...course, isEnrolled }
+      }))
+    }
+
+    res.json({ data: formatted, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
 
-//Detalle del curso
+
 const getCourseById = async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.id).populate('professor', 'name email');
@@ -34,7 +53,7 @@ const getCourseById = async (req, res, next) => {
   }
 };
 
-//Crear curso
+
 const createCourse = async (req, res, next) => {
   try {
     let { professor } = req.body
@@ -122,15 +141,32 @@ const deleteCourse = async (req, res, next) => {
 const listCoursesByProfessor = async (req, res, next) => {
   try {
     if (req.user.role !== USER_ROLES.PROFESSOR) {
-      return next(new HttpError('Debes estar registrado como profesor para ver ésta página', 403));
+      return next(new HttpError('Debes estar registrado como profesor para ver esta página', 403));
     }
-    const courses = await Course.find({ professor: req.user.id });
-    res.json(courses);
+
+    const filter = { professor: req.user.id };
+
+    if (req.query.search) {
+      const regex = new RegExp(req.query.search, 'i');
+      filter['$or'] = [
+        { title: regex }
+      ];
+    }
+    if (req.query.category) {
+      filter.category = req.query.category;
+    }
+
+    const { data, total, page, limit, totalPages } = await paginatedResponse(Course, req.query, filter);
+    const formatted = await Promise.all(data.map(async course => {
+      const enrolleds = await Enrollment.countDocuments({ course: course.id })
+      return { ...course.toObject(), enrolleds }
+    }))
+
+    res.json({ data: formatted, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
-
 
 
 exports.listCourses = listCourses;

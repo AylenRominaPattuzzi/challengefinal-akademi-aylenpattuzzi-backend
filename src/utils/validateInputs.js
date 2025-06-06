@@ -1,5 +1,7 @@
 const HttpError = require("./http-error");
 const { USER_ROLES } = require('../models/User');
+const Enrollment = require('../models/Enrollment');
+const Grade = require('../models/Grade');
 
 const validateUserInput = (data, isUpdate = false) => {
   const { name, email, password, role } = data;
@@ -7,7 +9,6 @@ const validateUserInput = (data, isUpdate = false) => {
   const validRoles = [USER_ROLES.SUPERADMIN, USER_ROLES.PROFESSOR, USER_ROLES.STUDENT];
 
   if (!isUpdate) {
-    // Validaciones para creación
     if (!name) return new HttpError('El nombre es requerido', 400);
     if (!email) return new HttpError('El email es requerido', 400);
     if (!emailRegex.test(email)) return new HttpError('El formato del email es inválido', 400);
@@ -16,7 +17,7 @@ const validateUserInput = (data, isUpdate = false) => {
     if (!role) return new HttpError('El rol es requerido', 400);
     if (!validRoles.includes(role)) return new HttpError('El rol es inválido', 400);
   } else {
-    // Validación para actualización parcial
+ 
     if (name !== undefined && !name) return new HttpError('El nombre no puede estar vacío', 400);
 
     if (email !== undefined) {
@@ -37,10 +38,12 @@ const validateUserInput = (data, isUpdate = false) => {
 };
 
 const validateCourseInput = (data) => {
-  const { title, description, professor, startDate, endDate, capacity } = data;
+  const { title, price, professor, startDate, endDate, capacity } = data;
 
   if (!title) return new HttpError('El título es requerido', 400);
   if (!professor) return new HttpError('El profesor es requerido', 400);
+  if (!price) return new HttpError('El precio es requerido', 400);
+  if (price < 0) return new HttpError('El precio no puede ser negativo', 400);
 
   if (!startDate) return new HttpError('La fecha de inicio es requerida', 400);
   if (isNaN(Date.parse(startDate))) return new HttpError('La fecha de inicio no es válida', 400);

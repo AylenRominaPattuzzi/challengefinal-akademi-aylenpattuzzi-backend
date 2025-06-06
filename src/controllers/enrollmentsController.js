@@ -1,29 +1,43 @@
 const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
+const { paginatedResponse } = require('../utils/paginatedResponse');
 
-// Listar mis inscripciones (solo alumno)
+
 const getMyEnrollments = async (req, res, next) => {
   try {
-    const enrollments = await Enrollment.find({ student: req.user.id })
-      .populate({
-        path: 'course',
-        select: 'title description startDate endDate capacity',
-        strictPopulate: false
-      });
+    const filter = { professor: req.user.id };
 
-    const formatted = enrollments.map(enrollment => ({
-      ...enrollment.course.toObject(),
-      enrollmentId: enrollment._id
-    }));
+    if (req.query.search) {
+      const regex = new RegExp(req.query.search, 'i');
+      filter['$or'] = [
+        { title: regex }
+      ];
+    }
+    if (req.query.category) {
+      filter.category = req.query.category;
+    }
 
-    res.json(formatted);
+
+    const populaate = {
+      path: 'course',
+      select: 'title description startDate endDate capacity',
+      strictPopulate: false
+    }
+    const { data, total, page, limit, totalPages } = await paginatedResponse(Enrollment, req.query, filter, populaate);
+
+    const formatted = await Promise.all(data.map(async enrollment => {
+      const enrolleds = await Enrollment.countDocuments({ course: enrollment.course.id })
+      return { ...enrollment.course.toObject(), enrolleds, enrollmentId: enrollment._id }
+    }))
+
+    res.json({ data: formatted, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
 
-// Inscribirse a un curso (solo alumno)
+
 const enrollInCourse = async (req, res, next) => {
   try {
     const { courseId, enrollmentDate } = req.body;
@@ -64,7 +78,7 @@ const enrollInCourse = async (req, res, next) => {
   }
 };
 
-// Cancelar inscripción (solo alumno)
+
 const cancelEnrollment = async (req, res, next) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id);
@@ -80,22 +94,40 @@ const cancelEnrollment = async (req, res, next) => {
   }
 };
 
-// Listar inscripciones por curso (solo profesor)
+
 const getEnrollmentsByCourse = async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.courseId);
     if (!course) return next(new HttpError('Curso no encontrado', 404));
+
     if (course.professor.toString() !== req.user.id) {
       return next(new HttpError('No autorizado para ver inscripciones de este curso', 403));
     }
 
-    const enrollments = await Enrollment.find({ course: req.params.courseId })
-      .populate('student', 'name email');
-    res.json(enrollments);
+    const filter = { course: req.params.courseId };
+
+    if (req.query.search) {
+      const regex = new RegExp(req.query.search, 'i');
+      filter['$or'] = [
+        { 'student.name': regex },
+        { 'student.email': regex }
+      ];
+    }
+    const populate = ('student', 'name email')
+    const { data, total, page, limit, totalPages } = await paginatedResponse(
+      Enrollment,
+      req.query,
+      filter,
+      populate
+    );
+
+    res.json({ data, total, page, limit, totalPages });
+
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
+
 
 exports.getMyEnrollments = getMyEnrollments;
 exports.enrollInCourse = enrollInCourse;

@@ -1,10 +1,13 @@
 const { User, USER_ROLES } = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { forgotPasswordEmail } = require('../utils/emails/forgotPasswordEmail');
-const {validateUserInput} = require('../utils/validateInputs');
+const { validateUserInput } = require('../utils/validateInputs');
 const sendEmail = require('../utils/sendEmail');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginatedResponse');
+const { listCourses } = require('./coursesController');
+const Course = require('../models/Course');
+const Enrollment = require('../models/Enrollment');
 
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
@@ -47,7 +50,7 @@ const registerUser = async (req, res, next) => {
       name,
       email,
       password,
-      role: role || USER_ROLES.STUDENT, 
+      role: role || USER_ROLES.STUDENT,
       profile: {
         documentNumber: profile.documentNumber,
         birthDate: profile.birthDate,
@@ -117,7 +120,7 @@ const createUser = async (req, res, next) => {
       return next(validationError);
     }
 
-    // Solo superadmin puede crear usuarios que no sean estudiantes
+ 
     if (![USER_ROLES.SUPERADMIN].includes(req.user.role)) {
       return next(new HttpError('No autorizado para crear usuarios', 403));
     }
@@ -125,7 +128,7 @@ const createUser = async (req, res, next) => {
     const { name, email, password, role, profile } = req.body;
 
 
-    // Validar rol permitido (solo profesor o superadmin, no estudiantes)
+  
     if (![USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN].includes(role)) {
       return next(new HttpError('Rol inválido para creación por superadmin', 400));
     }
@@ -154,14 +157,21 @@ const createUser = async (req, res, next) => {
 };
 
 
-
-
 const listUsers = async (req, res, next) => {
   try {
     const filter = {};
+
+    if (req.query.search) {
+      const regex = new RegExp(req.query.search, 'i');
+      filter['$or'] = [
+        { name: regex },
+        { email: regex }
+      ]
+    }
     if (req.query.role) {
       filter.role = req.query.role;
     }
+
 
     const { data, total, page, limit, totalPages } = await paginatedResponse(User, req.query, filter);
     res.json({ data, total, page, limit, totalPages });
@@ -205,6 +215,16 @@ const updateUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   try {
+    const professorCourse = await Course.countDocuments({ professor: req.params.id })
+    const StudentCourse = await Enrollment.countDocuments({ student: req.params.id })
+    
+    
+    if (professorCourse > 0) {
+      return next(new HttpError('No se puede eliminar un profesor que tenga un curso asignado', 400));
+    }
+    if (StudentCourse > 0) {
+      return next(new HttpError('No se puede eliminar un alumno que tenga un curso asignado', 400));
+    }
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     if (!deletedUser) {
       return next(new HttpError('Usuario no encontrado', 404));

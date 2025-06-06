@@ -18,10 +18,6 @@ const gradeSchema = new Schema({
     min: 0,
     max: 10
   },
-  comment: {
-    type: String,
-    trim: true
-  },
   dateAssigned: {
     type: Date,
     default: Date.now

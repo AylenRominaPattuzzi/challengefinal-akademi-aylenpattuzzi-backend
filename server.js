@@ -22,20 +22,21 @@ mongoose
   .then(() => console.log('MongoDB conectado'))
   .catch((err) => console.log('Error conectando a MongoDB', err));
 
-// Rutas
+
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes)
 app.use('/courses', coursesRutes);
 app.use('/enrollments', enrollmentsRoutes);
 app.use('/grades', gradeRoutes);
 app.use('/stats', statsRoutes);
-// Ruta no encontrada
-app.use((req, res, next) => {
+
+
+app.use((next) => {
   const error = new HttpError('Ruta no encontrada', 404);
   next(error);
 });
 
-app.use((error, req, res, next) => {
+app.use((error, res, next) => {
   if (res.headersSent) {
     return next(HttpError(error, error?.code || 500));
   }
