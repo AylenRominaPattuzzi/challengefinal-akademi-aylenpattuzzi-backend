@@ -6,7 +6,7 @@ const { paginatedResponse } = require('../utils/paginatedResponse');
 
 const getMyEnrollments = async (req, res, next) => {
   try {
-    const filter = { professor: req.user.id };
+    const filter = { student: req.user.id };
 
     if (req.query.search) {
       const regex = new RegExp(req.query.search, 'i');
@@ -14,20 +14,22 @@ const getMyEnrollments = async (req, res, next) => {
         { title: regex }
       ];
     }
-    if (req.query.category) {
-      filter.category = req.query.category;
-    }
 
+    courseMatch = {}
+    if (req.query.category) {
+      courseMatch.category = req.query.category;
+    }
 
     const populaate = {
       path: 'course',
-      select: 'title description startDate endDate capacity',
-      strictPopulate: false
+      select: 'title description startDate endDate capacity category',
+      strictPopulate: false,
+      match: courseMatch
     }
     const { data, total, page, limit, totalPages } = await paginatedResponse(Enrollment, req.query, filter, populaate);
 
-    const formatted = await Promise.all(data.map(async enrollment => {
-      const enrolleds = await Enrollment.countDocuments({ course: enrollment.course.id })
+    const formatted = await Promise.all(data.filter(c=>c?.course!==null).map(async enrollment => {
+      const enrolleds = await Enrollment.countDocuments({ course: enrollment.course._id })
       return { ...enrollment.course.toObject(), enrolleds, enrollmentId: enrollment._id }
     }))
 

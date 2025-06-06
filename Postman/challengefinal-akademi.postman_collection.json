@@ -1,0 +1,703 @@
+{
+	"info": {
+		"_postman_id": "bd927878-baad-432c-a511-44bd83bf98da",
+		"name": "challengefinal-akademi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20378233"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"aylenrominapattuzzi@gmail.com\",\n  \"password\": \"prueba123\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzVjMzY3MDExZGFlZDM0MDY2OTczMiIsImlhdCI6MTc0ODM2MDgyOSwiZXhwIjoxNzQ4MzY0NDI5fQ.irhcSkp4rL2g73sfBeSjjQk-JND1eIgE1ulMqobs_X4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzVjMzY3MDExZGFlZDM0MDY2OTczMiIsImlhdCI6MTc0ODM2MDgyOSwiZXhwIjoxNzQ4MzY0NDI5fQ.irhcSkp4rL2g73sfBeSjjQkJND1eIgE1ulMqobs_X4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"name\": \"pepe\",\n  \"email\": \"ddsds@gmail.com\",\n  \"password\": \"password123\",\n  \"role\": \"student\",\n  \"profile\": {\n    \"age\": 25\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot-password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"aylenrominapattuzzi@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/forgot-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset-password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/reset-password/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzVkZjI2ZjA5ZmZkYTNhZTM2ZDNiOCIsImVtYWlsIjoiYXlsZW5yb21pbmFwYXR0dXp6aUBnbWFpbC5jb20iLCJpYXQiOjE3NDgzNjEyOTQsImV4cCI6MTc0ODM4NjQ5NH0.coiPRBKp1CqYLPXEq5xr1fDlgmvA4-sLmFUX8nKlt9c",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password",
+								"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzVkZjI2ZjA5ZmZkYTNhZTM2ZDNiOCIsImVtYWlsIjoiYXlsZW5yb21pbmFwYXR0dXp6aUBnbWFpbC5jb20iLCJpYXQiOjE3NDgzNjEyOTQsImV4cCI6MTc0ODM4NjQ5NH0.coiPRBKp1CqYLPXEq5xr1fDlgmvA4-sLmFUX8nKlt9c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listUsers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/?page=1&limit=10&search=aylen&role=superadmin",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "aylen"
+								},
+								{
+									"key": "role",
+									"value": "superadmin"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createUser (superAdmin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Profesor X\",\n  \"email\": \"profesorx@example.com\",\n  \"password\": \"pass1234\",\n  \"role\": \"professor\",\n  \"profile\": {\n    \"department\": \"Literatura\"\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/user/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/6842f960dbf0731fdcb0c0a9",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"6842f960dbf0731fdcb0c0a9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateUser",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n            \"name\": \"Profesor X2\",\n            \"email\": \"profesorx@example.com\",\n            \"password\": \"$2b$12$0rksEhzTc.oh0gd87kGoMuoYgMFr9qIrl/iOJl8ZQvGt5orZF/g6O\",\n            \"role\": \"student\",\n            \"profile\": {\n                \"documentNumber\": 39613662,\n                \"birthDate\": \"07/04/1996\"\n            }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/user/6842f960dbf0731fdcb0c0a9",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"6842f960dbf0731fdcb0c0a9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/6842f960dbf0731fdcb0c0a9",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"6842f960dbf0731fdcb0c0a9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "createCourse",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Curso de Node.js\",\n  \"professor\":\"684251c1d50e2e2f5b8828ce\",\n  \"description\": \"Aprende a construir APIs\",\n  \"category\": \"programacion\",\n  \"price\": 500,\n  \"capacity\": 20,\n  \"startDate\": \"2025-07-01\",\n  \"endDate\": \"2025-08-15\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/courses",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listCourses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/courses/?category=backend&search=javascript&page=1&limit=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"courses",
+								""
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "backend"
+								},
+								{
+									"key": "search",
+									"value": "javascript"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCourseById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/courses/68388bf97ef1b2ae315ca8e4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"courses",
+								"68388bf97ef1b2ae315ca8e4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCourse",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"JavaScript\",\n    \"description\": \"\",\n    \"professor\": \"68423744c1781be9d2fcc3f6\",\n    \"startDate\": \"2025-06-18T00:00:00.000Z\",\n    \"endDate\": \"2025-08-15T00:00:00.000Z\",\n    \"capacity\": 50,\n    \"category\": \"backend\",\n    \"price\": 300\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/courses/684237a0c1781be9d2fcc405",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"courses",
+								"684237a0c1781be9d2fcc405"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteCourse",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/courses/6842f41adbf0731fdcb0c039",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"courses",
+								"6842f41adbf0731fdcb0c039"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listCoursesByProfessor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/courses/professor/?page=1&limit=10&search=holalala&category=backend",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"courses",
+								"professor",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "holalala"
+								},
+								{
+									"key": "category",
+									"value": "backend"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Enrollments",
+			"item": [
+				{
+					"name": "enrollInCourse",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"683f29382d84b5633789ab41\",     \n  \"courseId\": \"6841fe4276911c99117a65c9\",\n  \"enrollmentDate\": \"2025-05-28T12:00:00.000Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/enrollments/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"enrollments",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getMyEnrollments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/enrollments/my-courses/?page=1&limit=10&search=JavaScript&category=desarrollo",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"enrollments",
+								"my-courses",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "JavaScript"
+								},
+								{
+									"key": "category",
+									"value": "desarrollo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cancelEnrollment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/enrollments/6838ade3248e418a04178183",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"enrollments",
+								"6838ade3248e418a04178183"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEnrollmentsByCourse",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/enrollments/6838af8498666452f0b0c534",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"enrollments",
+								"6838af8498666452f0b0c534"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Grades",
+			"item": [
+				{
+					"name": "createGrade",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"6835df26f09ffda3ae36d3b8\",\n  \"courseId\": \"68388bf97ef1b2ae315ca8e4\",\n  \"value\": 9,\n  \"comment\": \"Excelente participación en clase\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/grades",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"grades"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getGradesByStudent",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/grades/student/6835df26f09ffda3ae36d3b8?page=1&limit=10&value=5&search",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"grades",
+								"student",
+								"6835df26f09ffda3ae36d3b8"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "value",
+									"value": "5"
+								},
+								{
+									"key": "search",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getGradesByCourse",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/grades/course/6841fe4276911c99117a65c9?page=1&limit=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"grades",
+								"course",
+								"6841fe4276911c99117a65c9"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateGrade",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": 7\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/grades/6838b1b2367536d1ed2fea36",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"grades",
+								"6838b1b2367536d1ed2fea36"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

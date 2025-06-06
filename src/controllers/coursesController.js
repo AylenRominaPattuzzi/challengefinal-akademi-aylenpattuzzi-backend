@@ -99,8 +99,8 @@ const updateCourse = async (req, res, next) => {
     if (!course) {
       return next(new HttpError('Curso no encontrado', 404));
     }
-
-    if (course.professor.toString() !== req.user.id) {
+    
+    if (course.professor.toString() !== req.user.id && req.user.role !== USER_ROLES.SUPERADMIN) {
       return next(new HttpError('No autorizado para editar este curso', 403));
     }
 

@@ -3,6 +3,7 @@ const Course = require('../models/Course');
 const HttpError = require('../utils/http-error');
 const { validateGradeInput } = require('../utils/validateInputs');
 const Enrollment = require('../models/Enrollment');
+const { paginatedResponse } = require('../utils/paginatedResponse');
 
 const createGrade = async (req, res, next) => {
   try {
@@ -56,36 +57,64 @@ const updateGrade = async (req, res, next) => {
 
 const getGradesByStudent = async (req, res, next) => {
   try {
-    
-    const grades = await Grade.find({ student: req.user.id })
-      .populate('course', 'title');
+    const filter = { student: req.user.id };
 
-    res.json(grades);
+    if (req.query.value) {
+      filter.value = req.query.value;
+    }
+    const courseMatch = {};
+    if (req.query.search) {
+      courseMatch.title = new RegExp(req.query.search, 'i');
+    }
+
+    const populate = {
+      path: 'course',
+      select: 'title description startDate endDate capacity category',
+      strictPopulate: false,
+      match: courseMatch
+    };
+
+    const { data, total, page, limit, totalPages } = await paginatedResponse(Grade, req.query, filter, populate);
+
+    res.json({ data, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
+
 
 
 const getGradesByCourse = async (req, res, next) => {
   try {
+    const filter = { course: req.params.id };
 
-    const grades = await Grade.find({ course: req.params.id })
-      .populate('student');
-    let extra = []
-    const enrolled = await Enrollment.find({ course: req.params.id })
-      .populate("student")
-    studentsWithGrades = grades.map(grade => grade.student.id)
-    enrolled.forEach(enroll => {
-      if (!studentsWithGrades.includes(enroll.student.id)) {
-        extra = [...extra, enroll.student]
-      }
+    const populate = {
+      path: 'student',
+      select: 'name email',
+      strictPopulate: false,
+    };
+
+    const { data, total, page, limit, totalPages } = await paginatedResponse(Grade, req.query, filter, populate);
+
+    const studentsWithGrades = data.map(grade => grade.student?._id?.toString()).filter(Boolean);
+
+    const enrolled = await Enrollment.find({ course: req.params.id }).populate({
+      path: 'student',
+      select: 'name email',
+      strictPopulate: false,
     });
-    res.json({ grades, extra });
+
+    const extra = enrolled
+      .map(enroll => enroll.student)
+      .filter(student => student && !studentsWithGrades.includes(student._id.toString()));
+
+    res.json({ data, extra, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
+
+
 
 exports.createGrade = createGrade;
 exports.updateGrade = updateGrade;

@@ -119,15 +119,12 @@ const createUser = async (req, res, next) => {
     if (validationError) {
       return next(validationError);
     }
-
  
     if (![USER_ROLES.SUPERADMIN].includes(req.user.role)) {
       return next(new HttpError('No autorizado para crear usuarios', 403));
     }
 
     const { name, email, password, role, profile } = req.body;
-
-
   
     if (![USER_ROLES.PROFESSOR, USER_ROLES.SUPERADMIN].includes(role)) {
       return next(new HttpError('Rol inválido para creación por superadmin', 400));

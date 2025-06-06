@@ -38,10 +38,9 @@ const validateUserInput = (data, isUpdate = false) => {
 };
 
 const validateCourseInput = (data) => {
-  const { title, price, professor, startDate, endDate, capacity } = data;
+  const { title, price, startDate, endDate, capacity } = data;
 
   if (!title) return new HttpError('El título es requerido', 400);
-  if (!professor) return new HttpError('El profesor es requerido', 400);
   if (!price) return new HttpError('El precio es requerido', 400);
   if (price < 0) return new HttpError('El precio no puede ser negativo', 400);
 
