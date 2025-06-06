@@ -8,16 +8,12 @@ const getMyEnrollments = async (req, res, next) => {
   try {
     const filter = { student: req.user.id };
 
-    if (req.query.search) {
-      const regex = new RegExp(req.query.search, 'i');
-      filter['$or'] = [
-        { title: regex }
-      ];
-    }
-
     courseMatch = {}
     if (req.query.category) {
-      courseMatch.category = req.query.category;
+      courseMatch.category = new RegExp(req.query.category, 'i');
+    }
+    if (req.query.search) {
+      courseMatch.title = new RegExp(req.query.search, 'i');
     }
 
     const populaate = {

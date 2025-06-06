@@ -10,10 +10,7 @@ const listCourses = async (req, res, next) => {
     const filter = {};
 
     if (req.query.search) {
-      const regex = new RegExp(req.query.search, 'i');
-      filter['$or'] = [
-        { title: regex }
-      ]
+      filter.title = new RegExp(req.query.search, 'i');
     }
 
     if (req.query.category) {
@@ -99,7 +96,7 @@ const updateCourse = async (req, res, next) => {
     if (!course) {
       return next(new HttpError('Curso no encontrado', 404));
     }
-    
+
     if (course.professor.toString() !== req.user.id && req.user.role !== USER_ROLES.SUPERADMIN) {
       return next(new HttpError('No autorizado para editar este curso', 403));
     }
@@ -147,11 +144,9 @@ const listCoursesByProfessor = async (req, res, next) => {
     const filter = { professor: req.user.id };
 
     if (req.query.search) {
-      const regex = new RegExp(req.query.search, 'i');
-      filter['$or'] = [
-        { title: regex }
-      ];
+      filter.title = new RegExp(req.query.search, 'i');
     }
+    
     if (req.query.category) {
       filter.category = req.query.category;
     }
