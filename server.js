@@ -31,7 +31,7 @@ app.use('/grades', gradeRoutes);
 app.use('/stats', statsRoutes);
 
 
-app.use((next) => {
+app.use((req, res, next) => {
   const error = new HttpError('Ruta no encontrada', 404);
   next(error);
 });
